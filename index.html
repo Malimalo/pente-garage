@@ -304,7 +304,8 @@
       // Calculate optimal slopes based on distance, elevation and vehicle constraints
       function calculateOptimalSlopes() {
         const distance = appData.path.distance;
-        const elevation = Math.abs(appData.path.elevation); // Work with positive value
+        // Convert elevation to positive drop amount (negative input means descent)
+        const elevation = Math.abs(appData.path.elevation);
         const slopeCount = appData.path.slopeCount;
         
         // Calculate section lengths (equal distribution)
@@ -325,7 +326,7 @@
         }
         
         // Check vehicle clearance
-        const clearanceCheck = checkVehicleClearance(slopes);
+        const clearanceCheck = checkVehicleClearance(slopes, distance);
         
         return {
           sections: slopes,
@@ -336,7 +337,7 @@
       }
 
       // Check if vehicle can pass without touching ground
-      function checkVehicleClearance(slopesSections) {
+      function checkVehicleClearance(slopesSections, totalLength) {
         const frontOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
         
         // Build height profile
@@ -362,7 +363,6 @@
         
         // Simulate vehicle movement
         const step = 5;
-        const totalLength = slopesSections.reduce((sum, s) => sum + s.length, 0);
         
         for (let vehiclePos = -appData.vehicle.length; vehiclePos <= totalLength; vehiclePos += step) {
           const frontWheelX = vehiclePos + frontOverhang;
