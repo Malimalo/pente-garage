@@ -340,6 +340,23 @@
         };
       }
 
+      // Helper function to get height at any position along the slope
+      function getHeightAtPosition(x, slopesSections) {
+        let cumulativeLength = 0;
+        let cumulativeDrop = 0;
+        
+        for (let section of slopesSections) {
+          if (x <= cumulativeLength + section.length) {
+            const progressInSection = x - cumulativeLength;
+            const dropInSection = (progressInSection / section.length) * section.drop;
+            return -(cumulativeDrop + dropInSection);
+          }
+          cumulativeLength += section.length;
+          cumulativeDrop += section.drop;
+        }
+        return -cumulativeDrop;
+      }
+
       // Check if slope angles are within vehicle's physical limits
       function checkSlopeAngles(slopesSections) {
         const frontOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
@@ -376,31 +393,16 @@
         const frontOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
         const rearOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
         
-        // Build height profile
-        function getHeightAtPosition(x) {
-          let cumulativeLength = 0;
-          let cumulativeDrop = 0;
-          
-          for (let section of slopesSections) {
-            if (x <= cumulativeLength + section.length) {
-              const progressInSection = x - cumulativeLength;
-              const dropInSection = (progressInSection / section.length) * section.drop;
-              return -(cumulativeDrop + dropInSection);
-            }
-            cumulativeLength += section.length;
-            cumulativeDrop += section.drop;
-          }
-          return -cumulativeDrop;
-        }
-        
         let minClearance = Infinity;
         let criticalPosition = null;
         let touches = false;
         
-        // Simulate vehicle movement with finer steps
-        const step = 2;
+        // Simulation parameters
+        const SIMULATION_STEP_CM = 2;
+        const CHECK_INTERVAL_CM = 5;
         
-        for (let vehiclePos = -appData.vehicle.length; vehiclePos <= totalLength; vehiclePos += step) {
+        // Simulate vehicle movement with finer steps
+        for (let vehiclePos = -appData.vehicle.length; vehiclePos <= totalLength; vehiclePos += SIMULATION_STEP_CM) {
           const frontWheelX = vehiclePos + frontOverhang;
           const rearWheelX = frontWheelX + appData.vehicle.wheelbase;
           
@@ -408,15 +410,15 @@
           if (frontWheelX >= 0 && frontWheelX <= totalLength &&
               rearWheelX >= 0 && rearWheelX <= totalLength) {
             
-            const frontWheelHeight = getHeightAtPosition(frontWheelX);
-            const rearWheelHeight = getHeightAtPosition(rearWheelX);
+            const frontWheelHeight = getHeightAtPosition(frontWheelX, slopesSections);
+            const rearWheelHeight = getHeightAtPosition(rearWheelX, slopesSections);
             
             // The vehicle is a rigid body - it rotates based on wheel positions
             const vehicleAngle = Math.atan2(rearWheelHeight - frontWheelHeight, appData.vehicle.wheelbase);
             
             // Check many points along the vehicle body
             // We need to check at fine granularity to catch ground contact
-            const numCheckPoints = Math.ceil(appData.vehicle.length / 5); // Check every 5cm
+            const numCheckPoints = Math.ceil(appData.vehicle.length / CHECK_INTERVAL_CM);
             
             for (let i = 0; i <= numCheckPoints; i++) {
               const relativePos = (i / numCheckPoints) * appData.vehicle.length;
@@ -424,7 +426,7 @@
               
               if (checkX >= 0 && checkX <= totalLength) {
                 // Get ground height at this position
-                const groundHeight = getHeightAtPosition(checkX);
+                const groundHeight = getHeightAtPosition(checkX, slopesSections);
                 
                 // Calculate vehicle bottom height at this position
                 // The vehicle rotates around the front wheel
@@ -572,29 +574,12 @@
         const frontWheelX = vehicleFrontPos + frontOverhang;
         const rearWheelX = frontWheelX + appData.vehicle.wheelbase;
         
-        // Get heights at wheel positions from the slope profile
-        function getHeightAtPosition(x) {
-          let cumulativeLength = 0;
-          let cumulativeDrop = 0;
-          
-          for (let section of slopeData.sections) {
-            if (x <= cumulativeLength + section.length) {
-              const progressInSection = x - cumulativeLength;
-              const dropInSection = (progressInSection / section.length) * section.drop;
-              return -(cumulativeDrop + dropInSection);
-            }
-            cumulativeLength += section.length;
-            cumulativeDrop += section.drop;
-          }
-          return -cumulativeDrop;
-        }
-        
         // Only draw if both wheels are on the slope
         if (frontWheelX >= 0 && frontWheelX <= totalLength &&
             rearWheelX >= 0 && rearWheelX <= totalLength) {
           
-          const frontWheelHeight = getHeightAtPosition(frontWheelX);
-          const rearWheelHeight = getHeightAtPosition(rearWheelX);
+          const frontWheelHeight = getHeightAtPosition(frontWheelX, slopeData.sections);
+          const rearWheelHeight = getHeightAtPosition(rearWheelX, slopeData.sections);
           
           // Calculate vehicle angle
           const vehicleAngle = Math.atan2(rearWheelHeight - frontWheelHeight, appData.vehicle.wheelbase);
