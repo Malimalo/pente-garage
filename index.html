@@ -325,74 +325,140 @@
           });
         }
         
-        // Check vehicle clearance
+        // Check vehicle clearance - proper physics simulation
         const clearanceCheck = checkVehicleClearance(slopes, distance);
+        
+        // Additional check: validate slope angle vs vehicle geometry
+        const angleCheck = checkSlopeAngles(slopes);
         
         return {
           sections: slopes,
           totalLength: distance,
           totalDrop: elevation,
-          vehicleCheck: clearanceCheck
+          vehicleCheck: clearanceCheck,
+          angleCheck: angleCheck
+        };
+      }
+
+      // Helper function to get height at any position along the slope
+      function getHeightAtPosition(x, slopesSections) {
+        let cumulativeLength = 0;
+        let cumulativeDrop = 0;
+        
+        for (let section of slopesSections) {
+          if (x <= cumulativeLength + section.length) {
+            const progressInSection = x - cumulativeLength;
+            const dropInSection = (progressInSection / section.length) * section.drop;
+            return -(cumulativeDrop + dropInSection);
+          }
+          cumulativeLength += section.length;
+          cumulativeDrop += section.drop;
+        }
+        return -cumulativeDrop;
+      }
+
+      // Check if slope angles are within vehicle's physical limits
+      function checkSlopeAngles(slopesSections) {
+        const frontOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
+        const rearOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
+        
+        // Calculate approach and departure angles based on vehicle geometry
+        // These are the maximum angles the vehicle can handle without scraping
+        const approachAngle = Math.atan(appData.vehicle.groundClearance / frontOverhang) * (180 / Math.PI);
+        const departureAngle = Math.atan(appData.vehicle.groundClearance / rearOverhang) * (180 / Math.PI);
+        
+        let maxSlopeAngle = 0;
+        for (let section of slopesSections) {
+          if (section.angle > maxSlopeAngle) {
+            maxSlopeAngle = section.angle;
+          }
+        }
+        
+        // Check if slopes exceed vehicle capabilities
+        const approachExceeded = maxSlopeAngle > approachAngle;
+        const departureExceeded = maxSlopeAngle > departureAngle;
+        
+        return {
+          approachAngle: approachAngle,
+          departureAngle: departureAngle,
+          maxSlopeAngle: maxSlopeAngle,
+          exceeds: approachExceeded || departureExceeded,
+          approachExceeded: approachExceeded,
+          departureExceeded: departureExceeded
         };
       }
 
       // Check if vehicle can pass without touching ground
       function checkVehicleClearance(slopesSections, totalLength) {
         const frontOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
-        
-        // Build height profile
-        function getHeightAtPosition(x) {
-          let cumulativeLength = 0;
-          let cumulativeDrop = 0;
-          
-          for (let section of slopesSections) {
-            if (x <= cumulativeLength + section.length) {
-              const progressInSection = x - cumulativeLength;
-              const dropInSection = (progressInSection / section.length) * section.drop;
-              return -(cumulativeDrop + dropInSection);
-            }
-            cumulativeLength += section.length;
-            cumulativeDrop += section.drop;
-          }
-          return -cumulativeDrop;
-        }
+        const rearOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
         
         let minClearance = Infinity;
         let criticalPosition = null;
         let touches = false;
         
-        // Simulate vehicle movement
-        const step = 5;
+        // Simulation parameters
+        const SIMULATION_STEP_CM = 2;
+        const CHECK_INTERVAL_CM = 5;
         
-        for (let vehiclePos = -appData.vehicle.length; vehiclePos <= totalLength; vehiclePos += step) {
+        // Simulate vehicle movement with finer steps
+        for (let vehiclePos = -appData.vehicle.length; vehiclePos <= totalLength; vehiclePos += SIMULATION_STEP_CM) {
           const frontWheelX = vehiclePos + frontOverhang;
-          const rearWheelX = vehiclePos + frontOverhang + appData.vehicle.wheelbase;
+          const rearWheelX = frontWheelX + appData.vehicle.wheelbase;
           
+          // Only check when both wheels are on the slope
           if (frontWheelX >= 0 && frontWheelX <= totalLength &&
               rearWheelX >= 0 && rearWheelX <= totalLength) {
             
-            const frontHeight = getHeightAtPosition(frontWheelX);
-            const rearHeight = getHeightAtPosition(rearWheelX);
-            const vehicleSlope = (rearHeight - frontHeight) / appData.vehicle.wheelbase;
+            const frontWheelHeight = getHeightAtPosition(frontWheelX, slopesSections);
+            const rearWheelHeight = getHeightAtPosition(rearWheelX, slopesSections);
             
-            // Check critical points
-            const checkPoints = [
-              { pos: vehiclePos, name: 'avant' },
-              { pos: vehiclePos + appData.vehicle.length / 2, name: 'centre' },
-              { pos: vehiclePos + appData.vehicle.length, name: 'arrière' }
-            ];
+            // The vehicle is a rigid body - it rotates based on wheel positions
+            const vehicleAngle = Math.atan2(rearWheelHeight - frontWheelHeight, appData.vehicle.wheelbase);
             
-            for (const point of checkPoints) {
-              if (point.pos >= 0 && point.pos <= totalLength) {
-                const groundHeight = getHeightAtPosition(point.pos);
-                const distFromFrontWheel = point.pos - frontWheelX;
-                const wheelHeightAtPoint = frontHeight + vehicleSlope * distFromFrontWheel;
-                const vehicleBottomHeight = wheelHeightAtPoint + appData.vehicle.groundClearance;
+            // Check many points along the vehicle body
+            // We need to check at fine granularity to catch ground contact
+            const numCheckPoints = Math.ceil(appData.vehicle.length / CHECK_INTERVAL_CM);
+            
+            for (let i = 0; i <= numCheckPoints; i++) {
+              const relativePos = (i / numCheckPoints) * appData.vehicle.length;
+              const checkX = vehiclePos + relativePos;
+              
+              if (checkX >= 0 && checkX <= totalLength) {
+                // Get ground height at this position
+                const groundHeight = getHeightAtPosition(checkX, slopesSections);
+                
+                // Calculate vehicle bottom height at this position
+                // The vehicle rotates around the front wheel
+                const distFromFrontWheel = checkX - frontWheelX;
+                
+                // Height of the vehicle axle line at this point (the rigid body connecting the wheels)
+                const vehicleAxleHeight = frontWheelHeight + Math.tan(vehicleAngle) * distFromFrontWheel;
+                
+                // The bottom of the vehicle is groundClearance above the axle line
+                // Since heights are negative going down, "above" means adding (less negative)
+                const vehicleBottomHeight = vehicleAxleHeight + appData.vehicle.groundClearance;
+                
+                // Clearance is the gap between vehicle bottom and ground
+                // Positive = vehicle is above ground (good)
+                // Negative = vehicle is below ground (touching/scraping)
                 const clearance = vehicleBottomHeight - groundHeight;
                 
                 if (clearance < minClearance) {
                   minClearance = clearance;
-                  criticalPosition = { position: vehiclePos.toFixed(0), point: point.name };
+                  let pointName;
+                  if (relativePos < frontOverhang) {
+                    pointName = 'porte-à-faux avant';
+                  } else if (relativePos > frontOverhang + appData.vehicle.wheelbase) {
+                    pointName = 'porte-à-faux arrière';
+                  } else {
+                    pointName = 'centre (empattement)';
+                  }
+                  criticalPosition = { 
+                    position: vehiclePos.toFixed(0), 
+                    point: pointName,
+                    checkX: checkX.toFixed(0)
+                  };
                 }
                 
                 if (clearance < 0) {
@@ -498,31 +564,74 @@
         
         ctx.setLineDash([]);
         
-        // Draw vehicle
-        const vehicleY = 20;
+        // Draw vehicle - positioned on the actual slope
         const vehicleColor = '#e74c3c';
         const frontOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
         
-        ctx.strokeStyle = vehicleColor;
-        ctx.fillStyle = vehicleColor;
-        ctx.lineWidth = 2;
+        // Position vehicle so it's visible on the slope
+        // Find a good position to show the vehicle (around 30% into the path)
+        const vehicleFrontPos = totalLength * 0.3;
+        const frontWheelX = vehicleFrontPos + frontOverhang;
+        const rearWheelX = frontWheelX + appData.vehicle.wheelbase;
         
-        // Vehicle body
-        ctx.fillRect(
-          toCanvasX(50),
-          toCanvasY(vehicleY + appData.vehicle.groundClearance + 30),
-          appData.vehicle.length * scale,
-          30
-        );
-        
-        // Wheels
-        const wheelRadius = 15;
-        ctx.beginPath();
-        ctx.arc(toCanvasX(50 + frontOverhang), toCanvasY(vehicleY + appData.vehicle.groundClearance), wheelRadius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(toCanvasX(50 + frontOverhang + appData.vehicle.wheelbase), toCanvasY(vehicleY + appData.vehicle.groundClearance), wheelRadius, 0, Math.PI * 2);
-        ctx.fill();
+        // Only draw if both wheels are on the slope
+        if (frontWheelX >= 0 && frontWheelX <= totalLength &&
+            rearWheelX >= 0 && rearWheelX <= totalLength) {
+          
+          const frontWheelHeight = getHeightAtPosition(frontWheelX, slopeData.sections);
+          const rearWheelHeight = getHeightAtPosition(rearWheelX, slopeData.sections);
+          
+          // Calculate vehicle angle
+          const vehicleAngle = Math.atan2(rearWheelHeight - frontWheelHeight, appData.vehicle.wheelbase);
+          
+          ctx.strokeStyle = vehicleColor;
+          ctx.fillStyle = vehicleColor;
+          ctx.lineWidth = 2;
+          
+          // Draw wheels ON the slope
+          const wheelRadius = 15;
+          
+          // Front wheel
+          ctx.beginPath();
+          ctx.arc(toCanvasX(frontWheelX), toCanvasY(frontWheelHeight), wheelRadius, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Rear wheel
+          ctx.beginPath();
+          ctx.arc(toCanvasX(rearWheelX), toCanvasY(rearWheelHeight), wheelRadius, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Draw vehicle body (rotated to follow the slope)
+          ctx.save();
+          
+          // Translate to front wheel position
+          ctx.translate(toCanvasX(frontWheelX), toCanvasY(frontWheelHeight));
+          
+          // Rotate to match slope
+          ctx.rotate(vehicleAngle);
+          
+          // Draw vehicle body relative to front wheel
+          const vehicleBodyHeight = 30;
+          const vehicleBodyYOffset = appData.vehicle.groundClearance * heightScale;
+          
+          // Body extends from front overhang to rear overhang
+          ctx.fillRect(
+            -frontOverhang * scale,
+            -vehicleBodyYOffset - vehicleBodyHeight,
+            appData.vehicle.length * scale,
+            vehicleBodyHeight
+          );
+          
+          // Draw axles to show wheel connection
+          ctx.strokeStyle = '#c0392b';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(appData.vehicle.wheelbase * scale, (rearWheelHeight - frontWheelHeight) * heightScale);
+          ctx.stroke();
+          
+          ctx.restore();
+        }
         
         // Labels
         ctx.fillStyle = '#333';
@@ -535,9 +644,25 @@
       function displayResults(slopeData) {
         const resultDiv = document.getElementById('calculationResult');
         const check = slopeData.vehicleCheck;
+        const angleCheck = slopeData.angleCheck;
         
         let statusHtml = '';
-        if (check.touches) {
+        
+        // Check angle limits first (most critical)
+        if (angleCheck && angleCheck.exceeds) {
+          statusHtml = `
+            <div class="status error">
+              ❌ ATTENTION: La pente dépasse les limites du véhicule!
+            </div>
+            <div class="warning">
+              <strong>⚠️ Angle de pente maximum:</strong> ${angleCheck.maxSlopeAngle.toFixed(2)}°<br>
+              <strong>Angle d'attaque du véhicule:</strong> ${angleCheck.approachAngle.toFixed(2)}°<br>
+              <strong>Angle de fuite du véhicule:</strong> ${angleCheck.departureAngle.toFixed(2)}°<br>
+              <strong>Problème:</strong> ${angleCheck.approachExceeded ? 'L\'avant du véhicule touchera le sol à l\'entrée/sortie de la pente. ' : ''}${angleCheck.departureExceeded ? 'L\'arrière du véhicule touchera le sol à l\'entrée/sortie de la pente. ' : ''}<br>
+              <strong>Recommandation:</strong> Réduisez la pente, augmentez la distance, ou choisissez un véhicule avec une meilleure garde au sol et des porte-à-faux plus courts.
+            </div>
+          `;
+        } else if (check.touches) {
           statusHtml = `
             <div class="status error">
               ⚠️ Attention: Le véhicule risque de toucher le sol
@@ -558,6 +683,19 @@
               <p><strong>Position critique:</strong> ${check.criticalPosition.point} du véhicule à ${check.criticalPosition.position} cm du point A</p>
             </div>
           `;
+          
+          // Add angle information even when passing
+          if (angleCheck) {
+            statusHtml += `
+              <div class="details" style="margin-top: 10px;">
+                <p><strong>Angles du véhicule:</strong></p>
+                <p>• Angle d'attaque: ${angleCheck.approachAngle.toFixed(2)}°</p>
+                <p>• Angle de fuite: ${angleCheck.departureAngle.toFixed(2)}°</p>
+                <p>• Angle de pente max: ${angleCheck.maxSlopeAngle.toFixed(2)}°</p>
+                <p style="color: #27ae60;">✓ Les angles sont dans les limites acceptables</p>
+              </div>
+            `;
+          }
         }
         
         // Construction specifications
