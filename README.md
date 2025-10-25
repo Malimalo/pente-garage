@@ -19,42 +19,20 @@ Cette application permet de visualiser et de calculer si un véhicule peut entre
 
 ## Installation et Utilisation
 
-### Prérequis
+### Utilisation locale
 
-- Node.js (version 14 ou supérieure)
-- npm
+Ouvrez simplement le fichier `index.html` dans votre navigateur web. Aucune installation ou serveur n'est nécessaire !
 
-### Installation
+### Déploiement sur GitHub Pages
 
-```bash
-npm install
-```
+1. Activez GitHub Pages dans les paramètres de votre dépôt
+2. Sélectionnez la branche principale comme source
+3. L'application sera automatiquement publiée
 
-### Développement
-
-```bash
-npm run dev
-```
-
-L'application sera accessible sur `http://localhost:5173/`
-
-### Build de production
-
-```bash
-npm run build
-```
-
-Les fichiers de production seront générés dans le dossier `dist/`
-
-### Prévisualisation de la production
-
-```bash
-npm run preview
-```
+L'application est entièrement statique et ne nécessite aucun serveur ou processus de build.
 
 ## Technologies utilisées
 
-- **Vite.js** - Build tool et dev server
 - **Vanilla JavaScript** - Pas de framework, code léger et performant
 - **HTML5 Canvas** - Pour la visualisation graphique
 - **CSS3** - Styling moderne et responsive
@@ -64,13 +42,7 @@ npm run preview
 
 ```
 pente-garage/
-├── index.html          # Page HTML principale
-├── src/
-│   ├── main.js        # Logique de l'application
-│   └── style.css      # Styles CSS
-├── public/
-│   └── vite.svg       # Logo Vite
-└── package.json       # Dépendances et scripts
+└── index.html          # Application complète (HTML, CSS, et JavaScript)
 ```
 
 ## Licence
