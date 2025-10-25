@@ -269,8 +269,8 @@ function calculateClearance() {
       const frontHeight = getHeightAtPosition(frontWheelX);
       const rearHeight = getHeightAtPosition(rearWheelX);
       
-      // Calculate vehicle angle and center height
-      const angleDiff = Math.atan2(rearHeight - frontHeight, appData.vehicle.wheelbase);
+      // Calculate vehicle slope (rise over run)
+      const vehicleSlope = (rearHeight - frontHeight) / appData.vehicle.wheelbase;
       
       // Check critical points: front, center, rear
       const checkPoints = [
@@ -284,11 +284,14 @@ function calculateClearance() {
           const groundHeight = getHeightAtPosition(point.pos);
           
           // Calculate vehicle bottom height at this point
+          // Coordinate system: height 0 is street level, negative values are below
           const distFromFrontWheel = point.pos - frontWheelX;
-          const wheelHeightAtPoint = frontHeight + Math.tan(angleDiff) * distFromFrontWheel;
-          // The vehicle bottom is above the wheel contact point by the ground clearance amount
+          const wheelHeightAtPoint = frontHeight + vehicleSlope * distFromFrontWheel;
+          // Vehicle bottom is ground clearance distance above the wheel contact point
           const vehicleBottomHeight = wheelHeightAtPoint + appData.vehicle.groundClearance;
           
+          // Clearance is the vertical distance between vehicle bottom and ground
+          // Positive clearance means no collision, negative means collision
           const clearance = vehicleBottomHeight - groundHeight;
           
           if (clearance < minClearance) {
