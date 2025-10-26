@@ -1,751 +1,82 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pente de Garage - Calculateur</title>
+    <meta charset="utf-8" />
+    <title>Car on Linear Terrain (Planck.js, 1 cm = 1 px)</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <style>
-      * {
+      html, body {
         margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+        height: 100%;
+        background: #e8f1ff;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
       }
-
-      body {
-        font-family: system-ui, -apple-system, sans-serif;
-        background: #f5f5f5;
-        color: #333;
-        padding: 20px;
-        line-height: 1.6;
-      }
-
-      #app {
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      h1 {
-        font-size: 2rem;
-        margin-bottom: 20px;
-        color: #2c3e50;
-      }
-
-      h2 {
-        font-size: 1.5rem;
-        margin: 20px 0 10px;
-        color: #34495e;
-      }
-
-      .container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 20px;
-      }
-
-      .section {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-
-      .input-group {
-        margin-bottom: 15px;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 500;
-        color: #555;
-      }
-
-      input[type="number"],
-      select {
+      #c {
         width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 1rem;
-        transition: border-color 0.2s;
-      }
-
-      input[type="number"]:focus,
-      select:focus {
-        outline: none;
-        border-color: #3498db;
-      }
-
-      .canvas-container {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
-      }
-
-      canvas {
+        height: 100%;
         display: block;
-        width: 100%;
-        border: 1px solid #ddd;
-        border-radius: 4px;
+        background: linear-gradient(#e8f1ff 70%, #d9e6ff);
       }
-
-      .result {
-        background: white;
-        padding: 20px;
+      .hud {
+        position: fixed;
+        left: 12px;
+        top: 12px;
+        padding: 8px 10px;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(0,0,0,0.08);
         border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-size: 14px;
+        line-height: 1.35;
       }
-
-      .result h2 {
-        margin-top: 0;
-      }
-
-      .status {
-        padding: 15px;
-        border-radius: 4px;
-        margin-bottom: 10px;
-        font-weight: 500;
-      }
-
-      .status.success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-      }
-
-      .status.error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-      }
-
-      .details {
-        font-size: 0.9rem;
-        color: #666;
-        margin-top: 10px;
-      }
-
-      .specs {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: 4px;
-        margin-top: 15px;
-        border-left: 4px solid #3498db;
-      }
-
-      .specs h3 {
-        font-size: 1.1rem;
-        margin-bottom: 10px;
-        color: #2c3e50;
-      }
-
-      .specs p {
-        margin: 5px 0;
-      }
-
-      .section-spec {
-        background-color: white;
-        padding: 10px;
-        margin: 10px 0;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-      }
-
-      .warning {
-        background-color: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffeeba;
-        padding: 10px;
-        border-radius: 4px;
-        margin-top: 10px;
-      }
-
-      @media (max-width: 768px) {
-        .container {
-          grid-template-columns: 1fr;
-        }
-        
-        h1 {
-          font-size: 1.5rem;
-        }
-        
-        h2 {
-          font-size: 1.2rem;
-        }
+      .hud kbd {
+        border: 1px solid #bbb;
+        border-bottom-width: 2px;
+        padding: 1px 6px;
+        border-radius: 6px;
+        background: #fff;
+        font-weight: 600;
       }
     </style>
   </head>
   <body>
-    <div id="app"></div>
-    <script>
-      // LocalStorage keys
-      const STORAGE_KEY = 'pente-garage-data';
+    <canvas id="c"></canvas>
+    <div class="hud">
+      <div><strong>Controls</strong></div>
+      <div>Throttle: <kbd>←</kbd> / <kbd>→</kbd></div>
+      <div>Brake: <kbd>Space</kbd></div>
+      <div>Reset: <kbd>R</kbd></div>
+      <hr />
+      <div>Scale: 1 m = 100 px ⇒ 1 cm = 1 px</div>
+      <div>Gravity: 9.81 m/s²</div>
+    </div>
+    <div class="hud" style="right:12px; left:auto; max-width: 320px;">
+      <div><strong>Terrain params</strong></div>
+      <div style="font-size:12px; color:#555; margin-top:4px;">Define each segment in centimeters: horizontal length (Δx) and vertical height (Δy).</div>
+      <div style="display:grid; grid-template-columns: 1.1fr 1fr 1fr; gap:6px; margin-top:8px; align-items:center;">
+        <div style="grid-column:1; font-weight:600;">Segment</div>
+        <div style="grid-column:2; font-weight:600;">Δx (cm)</div>
+        <div style="grid-column:3; font-weight:600;">Δy (cm)</div>
 
-      // Default values
-      const defaultData = {
-        path: {
-          distance: 530,      // Distance directe A-B en cm
-          elevation: -75,     // Dénivelé en cm (négatif = descente)
-          slopeCount: 3       // Nombre de sections de pente (1, 2, ou 3)
-        },
-        vehicle: {
-          length: 420,
-          wheelbase: 268.5,
-          groundClearance: 13.5
-        }
-      };
+        <div>3a</div>
+        <input id="seg3a_dx" type="number" step="1" min="0" value="100" />
+        <input id="seg3a_dy" type="number" step="1" value="-5" />
 
-      // Load data from localStorage or use defaults
-      function loadData() {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : defaultData;
-      }
+        <div>3b</div>
+        <input id="seg3b_dx" type="number" step="1" min="0" value="400" />
+        <input id="seg3b_dy" type="number" step="1" value="-70" />
 
-      // Save data to localStorage
-      function saveData(data) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      }
+        <div>3c</div>
+        <input id="seg3c_dx" type="number" step="1" min="0" value="0" />
+        <input id="seg3c_dy" type="number" step="1" value="-0" />
+      </div>
+      <div style="font-size:12px; color:#555; margin-top:6px;">Tip: Set Δy=0 for a flat segment.</div>
+      <hr />
+      <div><strong>Segment coordinates (cm)</strong></div>
+      <div id="coordsList" style="font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; margin-top:6px; line-height:1.4;"></div>
+    </div>
 
-      // Initialize app
-      let appData = loadData();
-
-      // Create HTML structure
-      document.querySelector('#app').innerHTML = `
-        <h1>Calculateur de Pente d'Allée de Garage</h1>
-        
-        <div class="container">
-          <div class="section">
-            <h2>Paramètres du Trajet (Point A → Point B)</h2>
-            <div class="input-group">
-              <label for="pathDistance">Distance directe A-B (cm)</label>
-              <input type="number" id="pathDistance" value="${appData.path.distance}" min="100" step="10">
-            </div>
-            <div class="input-group">
-              <label for="pathElevation">Dénivelé (cm, négatif = descente)</label>
-              <input type="number" id="pathElevation" value="${appData.path.elevation}" step="1">
-            </div>
-            <div class="input-group">
-              <label for="slopeCount">Nombre de sections de pente</label>
-              <select id="slopeCount">
-                <option value="1" ${appData.path.slopeCount === 1 ? 'selected' : ''}>1 pente unique</option>
-                <option value="2" ${appData.path.slopeCount === 2 ? 'selected' : ''}>2 pentes</option>
-                <option value="3" ${appData.path.slopeCount === 3 ? 'selected' : ''}>3 pentes</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="section">
-            <h2>Caractéristiques du Véhicule</h2>
-            <div class="input-group">
-              <label for="vehicleLength">Longueur totale (cm)</label>
-              <input type="number" id="vehicleLength" value="${appData.vehicle.length}" min="100" step="0.5">
-            </div>
-            <div class="input-group">
-              <label for="wheelbase">Empattement (cm)</label>
-              <input type="number" id="wheelbase" value="${appData.vehicle.wheelbase}" min="100" step="0.5">
-            </div>
-            <div class="input-group">
-              <label for="groundClearance">Garde au sol (cm)</label>
-              <input type="number" id="groundClearance" value="${appData.vehicle.groundClearance}" min="1" step="0.5">
-            </div>
-          </div>
-        </div>
-        
-        <div class="canvas-container">
-          <h2>Visualisation de l'Allée</h2>
-          <canvas id="garageCanvas" width="800" height="400"></canvas>
-        </div>
-        
-        <div class="result">
-          <h2>Pentes Calculées et Spécifications</h2>
-          <div id="calculationResult"></div>
-        </div>
-      `;
-
-      // Get input elements
-      const inputs = {
-        pathDistance: document.getElementById('pathDistance'),
-        pathElevation: document.getElementById('pathElevation'),
-        slopeCount: document.getElementById('slopeCount'),
-        vehicleLength: document.getElementById('vehicleLength'),
-        wheelbase: document.getElementById('wheelbase'),
-        groundClearance: document.getElementById('groundClearance')
-      };
-
-      // Add event listeners
-      Object.keys(inputs).forEach(key => {
-        inputs[key].addEventListener('input', handleInputChange);
-        inputs[key].addEventListener('change', handleInputChange);
-      });
-
-      function handleInputChange() {
-        // Update appData
-        appData.path.distance = parseFloat(inputs.pathDistance.value);
-        appData.path.elevation = parseFloat(inputs.pathElevation.value);
-        appData.path.slopeCount = parseInt(inputs.slopeCount.value);
-        appData.vehicle.length = parseFloat(inputs.vehicleLength.value);
-        appData.vehicle.wheelbase = parseFloat(inputs.wheelbase.value);
-        appData.vehicle.groundClearance = parseFloat(inputs.groundClearance.value);
-        
-        // Save to localStorage
-        saveData(appData);
-        
-        // Calculate optimal slopes
-        const slopes = calculateOptimalSlopes();
-        
-        // Update visualization and display results
-        drawPath(slopes);
-        displayResults(slopes);
-      }
-
-      // Calculate optimal slopes based on distance, elevation and vehicle constraints
-      function calculateOptimalSlopes() {
-        const distance = appData.path.distance;
-        // Convert elevation to positive drop amount (negative input means descent)
-        const elevation = Math.abs(appData.path.elevation);
-        const slopeCount = appData.path.slopeCount;
-        
-        // Calculate section lengths (equal distribution)
-        const sectionLength = distance / slopeCount;
-        
-        // Calculate elevation per section (equal distribution)
-        const elevationPerSection = elevation / slopeCount;
-        
-        // Create slope sections
-        const slopes = [];
-        for (let i = 0; i < slopeCount; i++) {
-          slopes.push({
-            length: sectionLength,
-            drop: elevationPerSection,
-            angle: Math.atan(elevationPerSection / sectionLength) * (180 / Math.PI),
-            percentage: (elevationPerSection / sectionLength) * 100
-          });
-        }
-        
-        // Check vehicle clearance - proper physics simulation
-        const clearanceCheck = checkVehicleClearance(slopes, distance);
-        
-        // Additional check: validate slope angle vs vehicle geometry
-        const angleCheck = checkSlopeAngles(slopes);
-        
-        return {
-          sections: slopes,
-          totalLength: distance,
-          totalDrop: elevation,
-          vehicleCheck: clearanceCheck,
-          angleCheck: angleCheck
-        };
-      }
-
-      // Helper function to get height at any position along the slope
-      function getHeightAtPosition(x, slopesSections) {
-        let cumulativeLength = 0;
-        let cumulativeDrop = 0;
-        
-        for (let section of slopesSections) {
-          if (x <= cumulativeLength + section.length) {
-            const progressInSection = x - cumulativeLength;
-            const dropInSection = (progressInSection / section.length) * section.drop;
-            return -(cumulativeDrop + dropInSection);
-          }
-          cumulativeLength += section.length;
-          cumulativeDrop += section.drop;
-        }
-        return -cumulativeDrop;
-      }
-
-      // Check if slope angles are within vehicle's physical limits
-      function checkSlopeAngles(slopesSections) {
-        const frontOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
-        const rearOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
-        
-        // Calculate approach and departure angles based on vehicle geometry
-        // These are the maximum angles the vehicle can handle without scraping
-        const approachAngle = Math.atan(appData.vehicle.groundClearance / frontOverhang) * (180 / Math.PI);
-        const departureAngle = Math.atan(appData.vehicle.groundClearance / rearOverhang) * (180 / Math.PI);
-        
-        let maxSlopeAngle = 0;
-        for (let section of slopesSections) {
-          if (section.angle > maxSlopeAngle) {
-            maxSlopeAngle = section.angle;
-          }
-        }
-        
-        // Check if slopes exceed vehicle capabilities
-        const approachExceeded = maxSlopeAngle > approachAngle;
-        const departureExceeded = maxSlopeAngle > departureAngle;
-        
-        return {
-          approachAngle: approachAngle,
-          departureAngle: departureAngle,
-          maxSlopeAngle: maxSlopeAngle,
-          exceeds: approachExceeded || departureExceeded,
-          approachExceeded: approachExceeded,
-          departureExceeded: departureExceeded
-        };
-      }
-
-      // Check if vehicle can pass without touching ground
-      function checkVehicleClearance(slopesSections, totalLength) {
-        const frontOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
-        const rearOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
-        
-        let minClearance = Infinity;
-        let criticalPosition = null;
-        let touches = false;
-        
-        // Simulation parameters
-        const SIMULATION_STEP_CM = 2;
-        const CHECK_INTERVAL_CM = 5;
-        
-        // Simulate vehicle movement with finer steps
-        for (let vehiclePos = -appData.vehicle.length; vehiclePos <= totalLength; vehiclePos += SIMULATION_STEP_CM) {
-          const frontWheelX = vehiclePos + frontOverhang;
-          const rearWheelX = frontWheelX + appData.vehicle.wheelbase;
-          
-          // Only check when both wheels are on the slope
-          if (frontWheelX >= 0 && frontWheelX <= totalLength &&
-              rearWheelX >= 0 && rearWheelX <= totalLength) {
-            
-            const frontWheelHeight = getHeightAtPosition(frontWheelX, slopesSections);
-            const rearWheelHeight = getHeightAtPosition(rearWheelX, slopesSections);
-            
-            // The vehicle is a rigid body - it rotates based on wheel positions
-            const vehicleAngle = Math.atan2(rearWheelHeight - frontWheelHeight, appData.vehicle.wheelbase);
-            
-            // Check many points along the vehicle body
-            // We need to check at fine granularity to catch ground contact
-            const numCheckPoints = Math.ceil(appData.vehicle.length / CHECK_INTERVAL_CM);
-            
-            for (let i = 0; i <= numCheckPoints; i++) {
-              const relativePos = (i / numCheckPoints) * appData.vehicle.length;
-              const checkX = vehiclePos + relativePos;
-              
-              if (checkX >= 0 && checkX <= totalLength) {
-                // Get ground height at this position
-                const groundHeight = getHeightAtPosition(checkX, slopesSections);
-                
-                // Calculate vehicle bottom height at this position
-                // The vehicle rotates around the front wheel
-                const distFromFrontWheel = checkX - frontWheelX;
-                
-                // Height of the vehicle axle line at this point (the rigid body connecting the wheels)
-                const vehicleAxleHeight = frontWheelHeight + Math.tan(vehicleAngle) * distFromFrontWheel;
-                
-                // The bottom of the vehicle is groundClearance above the axle line
-                // Since heights are negative going down, "above" means adding (less negative)
-                const vehicleBottomHeight = vehicleAxleHeight + appData.vehicle.groundClearance;
-                
-                // Clearance is the gap between vehicle bottom and ground
-                // Positive = vehicle is above ground (good)
-                // Negative = vehicle is below ground (touching/scraping)
-                const clearance = vehicleBottomHeight - groundHeight;
-                
-                if (clearance < minClearance) {
-                  minClearance = clearance;
-                  let pointName;
-                  if (relativePos < frontOverhang) {
-                    pointName = 'porte-à-faux avant';
-                  } else if (relativePos > frontOverhang + appData.vehicle.wheelbase) {
-                    pointName = 'porte-à-faux arrière';
-                  } else {
-                    pointName = 'centre (empattement)';
-                  }
-                  criticalPosition = { 
-                    position: vehiclePos.toFixed(0), 
-                    point: pointName,
-                    checkX: checkX.toFixed(0)
-                  };
-                }
-                
-                if (clearance < 0) {
-                  touches = true;
-                }
-              }
-            }
-          }
-        }
-        
-        return {
-          touches,
-          minClearance,
-          criticalPosition
-        };
-      }
-
-      // Draw path visualization
-      function drawPath(slopeData) {
-        const canvas = document.getElementById('garageCanvas');
-        const ctx = canvas.getContext('2d');
-        const width = canvas.width;
-        const height = canvas.height;
-        
-        // Clear canvas
-        ctx.clearRect(0, 0, width, height);
-        
-        const totalLength = slopeData.totalLength;
-        const totalDrop = slopeData.totalDrop;
-        
-        // Calculate scale
-        const padding = 50;
-        const scale = (width - 2 * padding) / totalLength;
-        const heightScale = (height - 2 * padding) / (totalDrop + 50);
-        
-        // Helper functions
-        function toCanvasX(x) {
-          return padding + x * scale;
-        }
-        
-        function toCanvasY(y) {
-          return height - padding - y * heightScale;
-        }
-        
-        // Draw ground level (point A)
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(toCanvasX(0), toCanvasY(0));
-        ctx.lineTo(toCanvasX(totalLength), toCanvasY(0));
-        ctx.stroke();
-        
-        // Draw slope profile
-        ctx.strokeStyle = '#2c3e50';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(toCanvasX(0), toCanvasY(0));
-        
-        let cumulativeLength = 0;
-        let cumulativeDrop = 0;
-        
-        for (let section of slopeData.sections) {
-          cumulativeLength += section.length;
-          cumulativeDrop += section.drop;
-          ctx.lineTo(toCanvasX(cumulativeLength), toCanvasY(-cumulativeDrop));
-        }
-        
-        ctx.stroke();
-        
-        // Fill area under slope
-        ctx.fillStyle = 'rgba(52, 152, 219, 0.1)';
-        ctx.beginPath();
-        ctx.moveTo(toCanvasX(0), toCanvasY(0));
-        
-        cumulativeLength = 0;
-        cumulativeDrop = 0;
-        for (let section of slopeData.sections) {
-          cumulativeLength += section.length;
-          cumulativeDrop += section.drop;
-          ctx.lineTo(toCanvasX(cumulativeLength), toCanvasY(-cumulativeDrop));
-        }
-        
-        ctx.lineTo(toCanvasX(totalLength), toCanvasY(0));
-        ctx.closePath();
-        ctx.fill();
-        
-        // Draw section markers
-        ctx.strokeStyle = '#95a5a6';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([5, 5]);
-        
-        cumulativeLength = 0;
-        cumulativeDrop = 0;
-        for (let i = 0; i < slopeData.sections.length - 1; i++) {
-          cumulativeLength += slopeData.sections[i].length;
-          cumulativeDrop += slopeData.sections[i].drop;
-          
-          ctx.beginPath();
-          ctx.moveTo(toCanvasX(cumulativeLength), toCanvasY(0));
-          ctx.lineTo(toCanvasX(cumulativeLength), toCanvasY(-cumulativeDrop));
-          ctx.stroke();
-        }
-        
-        ctx.setLineDash([]);
-        
-        // Draw vehicle - positioned on the actual slope
-        const vehicleColor = '#e74c3c';
-        const frontOverhang = (appData.vehicle.length - appData.vehicle.wheelbase) / 2;
-        
-        // Position vehicle so it's visible on the slope
-        // Find a good position to show the vehicle (around 30% into the path)
-        const vehicleFrontPos = totalLength * 0.3;
-        const frontWheelX = vehicleFrontPos + frontOverhang;
-        const rearWheelX = frontWheelX + appData.vehicle.wheelbase;
-        
-        // Only draw if both wheels are on the slope
-        if (frontWheelX >= 0 && frontWheelX <= totalLength &&
-            rearWheelX >= 0 && rearWheelX <= totalLength) {
-          
-          const frontWheelHeight = getHeightAtPosition(frontWheelX, slopeData.sections);
-          const rearWheelHeight = getHeightAtPosition(rearWheelX, slopeData.sections);
-          
-          // Calculate vehicle angle
-          const vehicleAngle = Math.atan2(rearWheelHeight - frontWheelHeight, appData.vehicle.wheelbase);
-          
-          ctx.strokeStyle = vehicleColor;
-          ctx.fillStyle = vehicleColor;
-          ctx.lineWidth = 2;
-          
-          // Draw wheels ON the slope
-          const wheelRadius = 15;
-          
-          // Front wheel
-          ctx.beginPath();
-          ctx.arc(toCanvasX(frontWheelX), toCanvasY(frontWheelHeight), wheelRadius, 0, Math.PI * 2);
-          ctx.fill();
-          
-          // Rear wheel
-          ctx.beginPath();
-          ctx.arc(toCanvasX(rearWheelX), toCanvasY(rearWheelHeight), wheelRadius, 0, Math.PI * 2);
-          ctx.fill();
-          
-          // Draw vehicle body (rotated to follow the slope)
-          ctx.save();
-          
-          // Translate to front wheel position
-          ctx.translate(toCanvasX(frontWheelX), toCanvasY(frontWheelHeight));
-          
-          // Rotate to match slope
-          ctx.rotate(vehicleAngle);
-          
-          // Draw vehicle body relative to front wheel
-          const vehicleBodyHeight = 30;
-          const vehicleBodyYOffset = appData.vehicle.groundClearance * heightScale;
-          
-          // Body extends from front overhang to rear overhang
-          ctx.fillRect(
-            -frontOverhang * scale,
-            -vehicleBodyYOffset - vehicleBodyHeight,
-            appData.vehicle.length * scale,
-            vehicleBodyHeight
-          );
-          
-          // Draw axles to show wheel connection
-          ctx.strokeStyle = '#c0392b';
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(appData.vehicle.wheelbase * scale, (rearWheelHeight - frontWheelHeight) * heightScale);
-          ctx.stroke();
-          
-          ctx.restore();
-        }
-        
-        // Labels
-        ctx.fillStyle = '#333';
-        ctx.font = '12px sans-serif';
-        ctx.fillText('Point A (départ)', toCanvasX(0) - 20, toCanvasY(-10));
-        ctx.fillText('Point B (arrivée)', toCanvasX(totalLength) - 50, toCanvasY(-totalDrop - 10));
-      }
-
-      // Display calculation results and construction specifications
-      function displayResults(slopeData) {
-        const resultDiv = document.getElementById('calculationResult');
-        const check = slopeData.vehicleCheck;
-        const angleCheck = slopeData.angleCheck;
-        
-        let statusHtml = '';
-        
-        // Check angle limits first (most critical)
-        if (angleCheck && angleCheck.exceeds) {
-          statusHtml = `
-            <div class="status error">
-              ❌ ATTENTION: La pente dépasse les limites du véhicule!
-            </div>
-            <div class="warning">
-              <strong>⚠️ Angle de pente maximum:</strong> ${angleCheck.maxSlopeAngle.toFixed(2)}°<br>
-              <strong>Angle d'attaque du véhicule:</strong> ${angleCheck.approachAngle.toFixed(2)}°<br>
-              <strong>Angle de fuite du véhicule:</strong> ${angleCheck.departureAngle.toFixed(2)}°<br>
-              <strong>Problème:</strong> ${angleCheck.approachExceeded ? 'L\'avant du véhicule touchera le sol à l\'entrée/sortie de la pente. ' : ''}${angleCheck.departureExceeded ? 'L\'arrière du véhicule touchera le sol à l\'entrée/sortie de la pente. ' : ''}<br>
-              <strong>Recommandation:</strong> Réduisez la pente, augmentez la distance, ou choisissez un véhicule avec une meilleure garde au sol et des porte-à-faux plus courts.
-            </div>
-          `;
-        } else if (check.touches) {
-          statusHtml = `
-            <div class="status error">
-              ⚠️ Attention: Le véhicule risque de toucher le sol
-            </div>
-            <div class="warning">
-              <strong>⚠️ Marge minimale:</strong> ${check.minClearance.toFixed(2)} cm (négatif = contact)<br>
-              <strong>Position critique:</strong> ${check.criticalPosition.point} du véhicule à ${check.criticalPosition.position} cm du point A<br>
-              <strong>Recommandation:</strong> Réduisez les pentes ou choisissez un véhicule avec plus de garde au sol.
-            </div>
-          `;
-        } else {
-          statusHtml = `
-            <div class="status success">
-              ✓ Le véhicule peut passer sans problème
-            </div>
-            <div class="details">
-              <p><strong>Marge minimale:</strong> ${check.minClearance.toFixed(2)} cm</p>
-              <p><strong>Position critique:</strong> ${check.criticalPosition.point} du véhicule à ${check.criticalPosition.position} cm du point A</p>
-            </div>
-          `;
-          
-          // Add angle information even when passing
-          if (angleCheck) {
-            statusHtml += `
-              <div class="details" style="margin-top: 10px;">
-                <p><strong>Angles du véhicule:</strong></p>
-                <p>• Angle d'attaque: ${angleCheck.approachAngle.toFixed(2)}°</p>
-                <p>• Angle de fuite: ${angleCheck.departureAngle.toFixed(2)}°</p>
-                <p>• Angle de pente max: ${angleCheck.maxSlopeAngle.toFixed(2)}°</p>
-                <p style="color: #27ae60;">✓ Les angles sont dans les limites acceptables</p>
-              </div>
-            `;
-          }
-        }
-        
-        // Construction specifications
-        let specsHtml = '<div class="specs"><h3>📐 Spécifications pour le Maçon</h3>';
-        
-        specsHtml += `<p><strong>Distance totale A-B:</strong> ${slopeData.totalLength.toFixed(1)} cm (${(slopeData.totalLength / 100).toFixed(2)} m)</p>`;
-        specsHtml += `<p><strong>Dénivelé total:</strong> ${slopeData.totalDrop.toFixed(1)} cm (${(slopeData.totalDrop / 100).toFixed(2)} m)</p>`;
-        specsHtml += `<p><strong>Nombre de sections:</strong> ${slopeData.sections.length}</p>`;
-        
-        slopeData.sections.forEach((section, index) => {
-          specsHtml += `
-            <div class="section-spec">
-              <strong>Section ${index + 1}:</strong><br>
-              • Longueur: ${section.length.toFixed(1)} cm (${(section.length / 100).toFixed(2)} m)<br>
-              • Descente: ${section.drop.toFixed(1)} cm (${(section.drop / 100).toFixed(2)} m)<br>
-              • Angle: ${section.angle.toFixed(2)}°<br>
-              • Pente: ${section.percentage.toFixed(2)}%<br>
-              ${index === 0 ? '• Point de départ: niveau du point A (0 cm)' : ''}
-              ${index === slopeData.sections.length - 1 ? `• Point d'arrivée: ${slopeData.totalDrop.toFixed(1)} cm sous le point A` : ''}
-            </div>
-          `;
-        });
-        
-        specsHtml += '<h3 style="margin-top: 15px;">📋 Instructions de Construction</h3>';
-        specsHtml += '<p>1. Marquez le point A (départ) au niveau de référence (0 cm)</p>';
-        
-        let cumulativeLength = 0;
-        let cumulativeDrop = 0;
-        
-        slopeData.sections.forEach((section, index) => {
-          cumulativeLength += section.length;
-          cumulativeDrop += section.drop;
-          
-          specsHtml += `<p>${index + 2}. À ${cumulativeLength.toFixed(1)} cm (${(cumulativeLength / 100).toFixed(2)} m) du point A, `;
-          specsHtml += `la hauteur doit être de ${cumulativeDrop.toFixed(1)} cm (${(cumulativeDrop / 100).toFixed(2)} m) en dessous du point A`;
-          if (index === slopeData.sections.length - 1) {
-            specsHtml += ' <strong>(Point B - arrivée)</strong>';
-          }
-          specsHtml += '</p>';
-        });
-        
-        specsHtml += '</div>';
-        
-        resultDiv.innerHTML = statusHtml + specsHtml;
-      }
-
-      // Initial render
-      const initialSlopes = calculateOptimalSlopes();
-      drawPath(initialSlopes);
-      displayResults(initialSlopes);
-    </script>
+    <!-- Planck.js (UMD) -->
+    <script src="https://unpkg.com/planck-js@0.3.0/dist/planck.min.js"></script>
+    <script src="./main.js"></script>
   </body>
 </html>
