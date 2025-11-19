@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Guide complet d'installation de la borne de recharge Schneider Electric EVH2S7P04K sur tableau électrique Schneider dernière génération">
+    <title>Installation Borne Schneider EVH2S7P04K - Guide Complet</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #3DCD58; --secondary-color: #00854A; --accent-color: #FF6B35;
+            --text-dark: #2C3E50; --text-light: #ECF0F1; --bg-light: #F8F9FA; --bg-white: #FFFFFF;
+            --border-color: #DEE2E6; --warning-bg: #FFF3CD; --danger-bg: #F8D7DA; --info-bg: #D1ECF1;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: var(--text-dark); background-color: var(--bg-light); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: var(--text-light); padding: 40px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        header p { font-size: 1.2rem; opacity: 0.9; }
+        .warning-banner { background-color: var(--danger-bg); border: 2px solid #F5C2C7; border-radius: 8px; padding: 20px; margin: 30px 0; display: flex; align-items: start; gap: 15px; }
+        .warning-icon { font-size: 2rem; color: var(--accent-color); flex-shrink: 0; }
+        .warning-content h2 { color: #721C24; margin-bottom: 10px; }
+        .section { background: var(--bg-white); border-radius: 8px; padding: 30px; margin: 30px 0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        h2 { color: var(--secondary-color); font-size: 2rem; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid var(--primary-color); }
+        h3 { color: var(--text-dark); font-size: 1.5rem; margin: 25px 0 15px 0; }
+        h4 { color: var(--text-dark); font-size: 1.2rem; margin: 20px 0 10px 0; }
+        ul, ol { margin-left: 25px; margin-bottom: 15px; }
+        li { margin-bottom: 10px; }
+        .info-box { background-color: var(--info-bg); border-left: 4px solid #0C5460; padding: 15px 20px; margin: 20px 0; border-radius: 4px; }
+        .warning-box { background-color: var(--warning-bg); border-left: 4px solid #856404; padding: 15px 20px; margin: 20px 0; border-radius: 4px; }
+        .specs-table { width: 100%; border-collapse: collapse; margin: 20px 0; overflow-x: auto; display: block; }
+        .specs-table table { width: 100%; min-width: 500px; }
+        .specs-table th, .specs-table td { padding: 12px 15px; text-align: left; border: 1px solid var(--border-color); }
+        .specs-table th { background-color: var(--secondary-color); color: var(--text-light); font-weight: 600; }
+        .specs-table tr:nth-child(even) { background-color: var(--bg-light); }
+        .step { background: var(--bg-light); border-left: 4px solid var(--primary-color); padding: 20px; margin: 20px 0; border-radius: 4px; }
+        .step-number { display: inline-block; background: var(--primary-color); color: white; width: 35px; height: 35px; border-radius: 50%; text-align: center; line-height: 35px; font-weight: bold; margin-right: 10px; }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; }
+        .tool-item { background: var(--bg-light); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .tool-item strong { color: var(--secondary-color); }
+        .checklist { list-style: none; margin-left: 0; }
+        .checklist li { padding: 10px 0; padding-left: 35px; position: relative; }
+        .checklist li:before { content: "☐"; position: absolute; left: 0; font-size: 1.5rem; color: var(--primary-color); }
+        .diagram { background: var(--bg-light); border: 2px solid var(--border-color); border-radius: 8px; padding: 20px; margin: 25px 0; text-align: center; }
+        .diagram-title { font-weight: bold; margin-bottom: 15px; color: var(--secondary-color); }
+        .wiring-diagram { font-family: 'Courier New', monospace; background: white; padding: 20px; border-radius: 4px; display: inline-block; text-align: left; line-height: 1.8; }
+        footer { background-color: var(--text-dark); color: var(--text-light); text-align: center; padding: 30px 20px; margin-top: 50px; }
+        .toc { background: var(--bg-light); border: 2px solid var(--border-color); border-radius: 8px; padding: 25px; margin: 30px 0; }
+        .toc h3 { margin-top: 0; color: var(--secondary-color); }
+        .toc ul { list-style: none; margin-left: 0; }
+        .toc li { padding: 8px 0; }
+        .toc a { color: var(--text-dark); text-decoration: none; transition: color 0.3s; }
+        .toc a:hover { color: var(--primary-color); text-decoration: underline; }
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8rem; }
+            header p { font-size: 1rem; }
+            h2 { font-size: 1.6rem; }
+            h3 { font-size: 1.3rem; }
+            .section { padding: 20px; }
+            .warning-banner { flex-direction: column; }
+            .tools-grid { grid-template-columns: 1fr; }
+            .specs-table { font-size: 0.9rem; }
+        }
+        @media (max-width: 480px) {
+            header h1 { font-size: 1.5rem; }
+            .container { padding: 10px; }
+            .section { padding: 15px; }
+            .step { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔌 Installation Borne de Recharge Schneider Electric EVH2S7P04K</h1>
+        <p>Guide complet d'installation sur tableau électrique Schneider dernière génération</p>
+    </header>
+
+    <div class="container">
+        <div class="warning-banner">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-content">
+                <h2>Avertissement de Sécurité Important</h2>
+                <p><strong>L'installation d'une borne de recharge pour véhicule électrique doit être réalisée par un électricien qualifié et certifié.</strong></p>
+                <p>Toute intervention sur une installation électrique présente des risques d'électrocution mortelle. Ce guide est fourni à titre informatif uniquement. Respectez toujours les normes en vigueur (NF C 15-100, NF C 15-722) et les réglementations locales.</p>
+            </div>
+        </div>
+
+        <div class="toc">
+            <h3>📑 Table des Matières</h3>
+            <ul>
+                <li><a href="#presentation">1. Présentation de la borne EVH2S7P04K</a></li>
+                <li><a href="#specifications">2. Spécifications techniques</a></li>
+                <li><a href="#prerequis">3. Prérequis et vérifications</a></li>
+                <li><a href="#outils">4. Outils et matériel nécessaires</a></li>
+                <li><a href="#preparation">5. Préparation de l'installation</a></li>
+                <li><a href="#installation-electrique">6. Installation électrique au tableau</a></li>
+                <li><a href="#installation-borne">7. Installation de la borne</a></li>
+                <li><a href="#mise-en-service">8. Mise en service et tests</a></li>
+                <li><a href="#maintenance">9. Maintenance et entretien</a></li>
+                <li><a href="#troubleshooting">10. Dépannage</a></li>
+            </ul>
+        </div>
+
+        <div class="section" id="presentation">
+            <h2>1. Présentation de la borne EVH2S7P04K</h2>
+            <p>La <strong>Schneider Electric EVH2S7P04K</strong> est une borne de recharge intelligente pour véhicules électriques de dernière génération, offrant une puissance maximale de 7,4 kW en monophasé.</p>
+            
+            <h3>Caractéristiques principales :</h3>
+            <ul>
+                <li>✅ Puissance de charge : 7,4 kW (32A)</li>
+                <li>✅ Compatible avec tous les véhicules électriques et hybrides rechargeables</li>
+                <li>✅ Connectivité WiFi et Bluetooth intégrée</li>
+                <li>✅ Application mobile EVlink Home pour le contrôle et la programmation</li>
+                <li>✅ Protection IP54 (utilisation intérieure et extérieure)</li>
+                <li>✅ Câble de recharge Type 2 de 4 mètres inclus</li>
+                <li>✅ Système de délestage dynamique</li>
+                <li>✅ Conformité CE, garantie 2 ans</li>
+            </ul>
+        </div>
+
+        <div class="section" id="specifications">
+            <h2>2. Spécifications Techniques</h2>
+            
+            <div class="specs-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Caractéristique</th>
+                            <th>Valeur</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Modèle</td><td>EVH2S7P04K</td></tr>
+                        <tr><td>Tension nominale</td><td>230V AC monophasé</td></tr>
+                        <tr><td>Courant nominal</td><td>32A</td></tr>
+                        <tr><td>Puissance maximale</td><td>7,4 kW</td></tr>
+                        <tr><td>Fréquence</td><td>50/60 Hz</td></tr>
+                        <tr><td>Type de prise</td><td>Type 2 (IEC 62196-2)</td></tr>
+                        <tr><td>Longueur du câble</td><td>4 mètres</td></tr>
+                        <tr><td>Protection différentielle requise</td><td>30 mA Type A ou Type B</td></tr>
+                        <tr><td>Disjoncteur recommandé</td><td>40A courbe C ou D</td></tr>
+                        <tr><td>Section de câble minimale</td><td>10 mm² (cuivre)</td></tr>
+                        <tr><td>Température de fonctionnement</td><td>-25°C à +40°C</td></tr>
+                        <tr><td>Indice de protection</td><td>IP54</td></tr>
+                        <tr><td>Dimensions (H x L x P)</td><td>350 x 165 x 100 mm</td></tr>
+                        <tr><td>Poids</td><td>2,8 kg</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Bon à savoir :</strong> La borne EVH2S7P04K intègre un système de protection contre les surintensités, les surtensions, les sous-tensions et les défauts de terre, assurant une sécurité maximale lors de la recharge.
+            </div>
+        </div>
+
+        <div class="section" id="prerequis">
+            <h2>3. Prérequis et Vérifications</h2>
+            
+            <h3>3.1. Vérifications préalables de l'installation existante</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Vérifier la puissance disponible au compteur</strong>
+                <p>Assurez-vous que votre abonnement électrique permet l'ajout de 7,4 kW supplémentaires. Un abonnement de minimum 9 kVA est recommandé (idéalement 12 kVA ou plus).</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Identifier le tableau électrique</strong>
+                <p>Vérifiez que vous disposez d'un tableau électrique Schneider Electric dernière génération (gamme Resi9, Acti9 ou Pragma Evolution) avec des emplacements libres pour :</p>
+                <ul>
+                    <li>1 disjoncteur différentiel 40A Type A ou Type B (2 modules)</li>
+                    <li>1 interrupteur différentiel 40A 30mA Type A (si non existant)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Évaluer la distance entre le tableau et la borne</strong>
+                <p>Mesurez la distance entre votre tableau électrique et l'emplacement prévu pour la borne. Une distance maximale de 30 mètres est recommandée pour une section de câble de 10 mm².</p>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Attention :</strong> Si la distance dépasse 30 mètres, il sera nécessaire d'utiliser une section de câble supérieure (16 mm²) pour compenser les pertes en ligne et respecter les normes de chute de tension.
+            </div>
+
+            <h3>3.2. Conformité aux normes</h3>
+            <ul class="checklist">
+                <li>Installation conforme à la norme NF C 15-100 (installations électriques basse tension)</li>
+                <li>Installation conforme à la norme NF C 15-722 (alimentation des véhicules électriques)</li>
+                <li>Liaison équipotentielle correctement réalisée</li>
+                <li>Mise à la terre conforme avec résistance &lt; 100 Ω</li>
+                <li>Schéma de l'installation électrique à jour</li>
+            </ul>
+        </div>
+
+        <div class="section" id="outils">
+            <h2>4. Outils et Matériel Nécessaires</h2>
+            
+            <h3>4.1. Outils requis</h3>
+            <div class="tools-grid">
+                <div class="tool-item"><strong>🔧 Tournevis</strong><p>Plat et cruciforme isolés 1000V</p></div>
+                <div class="tool-item"><strong>🔨 Perceuse</strong><p>Avec forets adaptés (béton, bois)</p></div>
+                <div class="tool-item"><strong>✂️ Pince coupante</strong><p>Pour câbles électriques</p></div>
+                <div class="tool-item"><strong>🔪 Dénude-câble</strong><p>Adapté pour 10 mm²</p></div>
+                <div class="tool-item"><strong>📏 Niveau à bulle</strong><p>Pour installation verticale</p></div>
+                <div class="tool-item"><strong>📐 Mètre ruban</strong><p>Minimum 5 mètres</p></div>
+                <div class="tool-item"><strong>⚡ Testeur de tension</strong><p>Pour vérification absence de tension</p></div>
+                <div class="tool-item"><strong>🔩 Clé à molette</strong><p>Pour serrage des bornes</p></div>
+            </div>
+
+            <h3>4.2. Matériel électrique nécessaire</h3>
+            <ul>
+                <li><strong>Disjoncteur différentiel Schneider Electric :</strong>
+                    <ul>
+                        <li>Référence recommandée : Resi9 XE 1P+N 40A courbe C ou D (R9EFC640 ou similaire)</li>
+                        <li>Alternatif : Disjoncteur magnéto-thermique + ID 30mA Type A en amont</li>
+                    </ul>
+                </li>
+                <li><strong>Interrupteur différentiel 40A 30mA Type A</strong> (si non présent sur le tableau)
+                    <ul>
+                        <li>Référence : Schneider Electric Resi9 XP 40A 30mA Type A (R9PRC240 ou similaire)</li>
+                    </ul>
+                </li>
+                <li><strong>Câble électrique :</strong>
+                    <ul>
+                        <li>Section : 3G10 mm² (phase, neutre, terre) ou 5G10 mm² selon installation</li>
+                        <li>Type : R2V (rigide) ou U1000R2V pour passage enterré</li>
+                        <li>Longueur : selon distance mesurée + 10% de marge</li>
+                    </ul>
+                </li>
+                <li><strong>Gaine ICTA Ø 40 mm</strong> (si passage encastré ou apparent)</li>
+                <li><strong>Boîte de dérivation étanche IP55</strong> (si nécessaire)</li>
+                <li><strong>Chevilles et vis</strong> adaptées au support (béton, brique, bois)</li>
+                <li><strong>Colliers de fixation</strong> pour câbles</li>
+                <li><strong>Embouts de câblage</strong> (cosses tubulaires pour 10 mm²)</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>💡 Conseil :</strong> Privilégiez du matériel de la gamme Schneider Electric pour garantir une compatibilité optimale et une homogénéité de votre installation.
+            </div>
+        </div>
+
+        <div class="section" id="preparation">
+            <h2>5. Préparation de l'Installation</h2>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Coupure générale de l'alimentation</strong>
+                <p><strong style="color: red;">OBLIGATOIRE :</strong> Coupez le disjoncteur général de votre installation et vérifiez l'absence de tension avec un testeur avant toute intervention.</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Planification du cheminement des câbles</strong>
+                <ul>
+                    <li>Tracez le parcours optimal entre le tableau électrique et l'emplacement de la borne</li>
+                    <li>Évitez les zones de passage et les sources de chaleur</li>
+                    <li>Prévoyez des passages étanches si traversée de parois extérieures</li>
+                    <li>Respectez les rayons de courbure minimaux des câbles (10 × diamètre du câble)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Choix de l'emplacement de la borne</strong>
+                <ul>
+                    <li>À proximité du stationnement du véhicule (rayon de 4 mètres max)</li>
+                    <li>Hauteur d'installation : 1,20 à 1,50 m du sol</li>
+                    <li>Support stable et résistant (mur en dur, poteau)</li>
+                    <li>Protection contre les intempéries si installation extérieure</li>
+                    <li>Accès facile pour la maintenance</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Préparation du support de fixation</strong>
+                <ul>
+                    <li>Percez les trous de fixation selon le gabarit fourni avec la borne</li>
+                    <li>Insérez les chevilles adaptées au type de support</li>
+                    <li>Vérifiez la verticalité avec un niveau à bulle</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="installation-electrique">
+            <h2>6. Installation Électrique au Tableau</h2>
+            
+            <div class="warning-box">
+                <strong>⚠️ SÉCURITÉ :</strong> Assurez-vous que le disjoncteur général est bien coupé et condamné (verrouillé ou signalé) pendant toute la durée des travaux. Utilisez un VAT (Vérificateur d'Absence de Tension) avant toute intervention.
+            </div>
+
+            <h3>6.1. Schéma de raccordement au tableau Schneider</h3>
+            
+            <div class="diagram">
+                <div class="diagram-title">Schéma de principe - Tableau électrique Schneider</div>
+                <div class="wiring-diagram">
+<pre>┌─────────────────────────────────────────────┐
+│   TABLEAU ÉLECTRIQUE SCHNEIDER              │
+│   (Resi9 / Acti9 / Pragma Evolution)        │
+├─────────────────────────────────────────────┤
+│  [DISJONCTEUR DE BRANCHEMENT 500mA]         │
+│                 │                           │
+│  ┌──────────────┴──────────────┐            │
+│  │ INTERRUPTEUR DIFFÉRENTIEL   │            │
+│  │ 40A 30mA Type A              │            │
+│  └──────────────┬──────────────┘            │
+│                 │                           │
+│  ┌──────────────┴──────────────┐            │
+│  │ DISJONCTEUR DIVISIONNAIRE   │            │
+│  │ 40A Courbe C ou D            │            │
+│  └──────────────┬──────────────┘            │
+│                 │                           │
+│      ┌──────────┼─────────┐                 │
+│      │          │         │                 │
+│      L         N         PE                 │
+└──────┼──────────┼─────────┼─────────────────┘
+       │          │         │ Câble 3G10mm²
+       ▼          ▼         ▼
+  ┌────────────────────────────┐
+  │   BORNE EVH2S7P04K         │
+  │   L1 (Phase) - Marron      │
+  │   N (Neutre) - Bleu        │
+  │   PE (Terre) - Vert/Jaune  │
+  └────────────────────────────┘</pre>
+                </div>
+            </div>
+
+            <h3>6.2. Installation pas à pas au tableau</h3>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Installation de l'interrupteur différentiel 40A 30mA Type A</strong>
+                <ul>
+                    <li>Si non présent, installez un ID 40A 30mA Type A sur le rail DIN du tableau</li>
+                    <li>Positionnez-le en tête de rangée dédiée ou utilisez une rangée existante avec capacité suffisante</li>
+                    <li>Raccordez l'alimentation amont (phase et neutre depuis le disjoncteur de branchement)</li>
+                    <li>Respectez le schéma de câblage du fabricant (repérage L, N)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Installation du disjoncteur divisionnaire 40A</strong>
+                <ul>
+                    <li>Clipsez le disjoncteur 40A (Resi9 ou Acti9) sur le rail DIN en aval de l'ID 30mA</li>
+                    <li>Vérifiez que le calibre est bien 40A courbe C ou D</li>
+                    <li>Le disjoncteur doit être bipolaire (Phase + Neutre coupés)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Raccordement du câble d'alimentation de la borne</strong>
+                <ul>
+                    <li>Dénudez les extrémités du câble 3G10 mm² (environ 12 mm)</li>
+                    <li>Installez des embouts de câblage (cosses) sur chaque conducteur</li>
+                    <li>Raccordez le conducteur de phase (marron) sur la borne L du disjoncteur</li>
+                    <li>Raccordez le conducteur neutre (bleu) sur la borne N du disjoncteur</li>
+                    <li>Raccordez le conducteur de terre (vert/jaune) sur la barrette de terre du tableau</li>
+                    <li>Serrez fermement toutes les connexions (couple de serrage : 2,5 Nm)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Vérification des connexions</strong>
+                <ul>
+                    <li>Tirez légèrement sur chaque conducteur pour vérifier la solidité du serrage</li>
+                    <li>Vérifiez l'absence de brins de cuivre dépassant des bornes</li>
+                    <li>Assurez-vous qu'aucun conducteur ne touche les parties métalliques du tableau</li>
+                    <li>Étiquetez le disjoncteur : "BORNE EV - EVH2S7P04K"</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Rappel important :</strong> La section de câble de 10 mm² est adaptée pour une longueur maximale de 30 mètres. Au-delà, utilisez du 16 mm² pour limiter la chute de tension à moins de 3%.
+            </div>
+        </div>
+
+        <div class="section" id="installation-borne">
+            <h2>7. Installation de la Borne EVH2S7P04K</h2>
+            
+            <h3>7.1. Montage mural de la borne</h3>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Fixation du support</strong>
+                <ul>
+                    <li>Utilisez le gabarit de perçage fourni dans le kit d'installation</li>
+                    <li>Marquez les 4 points de fixation au mur</li>
+                    <li>Percez les trous avec un foret adapté (Ø 8 mm pour chevilles de 10 mm)</li>
+                    <li>Insérez les chevilles et fixez la plaque de montage avec les vis fournies</li>
+                    <li>Vérifiez la planéité et l'horizontalité avec un niveau</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Passage du câble d'alimentation</strong>
+                <ul>
+                    <li>Faites passer le câble 3G10 mm² par l'entrée presse-étoupe de la borne (située en bas ou en arrière selon le modèle)</li>
+                    <li>Laissez suffisamment de longueur de câble (environ 30 cm) pour faciliter le raccordement</li>
+                    <li>Serrez le presse-étoupe pour assurer l'étanchéité (IP54)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Raccordement électrique de la borne</strong>
+                <ul>
+                    <li>Ouvrez le capot de protection de la borne (vis de sécurité)</li>
+                    <li>Identifiez les bornes de raccordement à l'intérieur :
+                        <ul>
+                            <li><strong>L1 (Phase)</strong> - Bornier marqué L ou L1</li>
+                            <li><strong>N (Neutre)</strong> - Bornier marqué N</li>
+                            <li><strong>PE (Terre)</strong> - Bornier marqué ⏚ ou PE</li>
+                        </ul>
+                    </li>
+                    <li>Dénudez les conducteurs sur 12-15 mm</li>
+                    <li>Installez des embouts de câblage si nécessaire</li>
+                    <li>Raccordez les conducteurs sur les borniers correspondants :
+                        <ul>
+                            <li>Conducteur <strong>marron</strong> → borne <strong>L1</strong></li>
+                            <li>Conducteur <strong>bleu</strong> → borne <strong>N</strong></li>
+                            <li>Conducteur <strong>vert/jaune</strong> → borne <strong>PE (⏚)</strong></li>
+                        </ul>
+                    </li>
+                    <li>Serrez les vis de connexion avec un couple de 2,5 Nm</li>
+                    <li>Vérifiez la solidité de chaque connexion en tirant légèrement sur les câbles</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Attention au repérage des couleurs :</strong>
+                <ul>
+                    <li>Marron ou Noir = Phase (L1)</li>
+                    <li>Bleu = Neutre (N)</li>
+                    <li>Vert/Jaune = Terre (PE)</li>
+                </ul>
+                Ne jamais inverser phase et neutre. Une inversion peut endommager la borne et présente un danger électrique.
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Fermeture et sécurisation</strong>
+                <ul>
+                    <li>Rangez soigneusement les câbles dans le boîtier</li>
+                    <li>Vérifiez qu'aucun conducteur n'est pincé ou en contact avec des parties métalliques</li>
+                    <li>Refermez le capot de protection</li>
+                    <li>Serrez les vis de sécurité du capot</li>
+                    <li>Clipsez la borne sur sa plaque de montage murale</li>
+                </ul>
+            </div>
+
+            <h3>7.2. Raccordement du câble de recharge</h3>
+            <p>Le câble de recharge Type 2 de 4 mètres est généralement déjà connecté en usine sur la borne EVH2S7P04K. Vérifiez simplement que :</p>
+            <ul>
+                <li>Le câble est correctement logé dans son support de rangement</li>
+                <li>Le connecteur Type 2 n'est pas endommagé</li>
+                <li>Le système de verrouillage du connecteur fonctionne correctement</li>
+            </ul>
+        </div>
+
+        <div class="section" id="mise-en-service">
+            <h2>8. Mise en Service et Tests</h2>
+            
+            <div class="warning-box">
+                <strong>⚠️ Procédure de mise sous tension :</strong> Suivez scrupuleusement l'ordre des étapes pour éviter tout incident.
+            </div>
+
+            <h3>8.1. Vérifications avant mise sous tension</h3>
+            <ul class="checklist">
+                <li>Toutes les connexions sont correctement serrées et isolées</li>
+                <li>Aucun conducteur ne dépasse des borniers</li>
+                <li>Le presse-étoupe est serré et étanche</li>
+                <li>La borne est solidement fixée au mur</li>
+                <li>Les capots de protection sont fermés et sécurisés</li>
+                <li>L'espace autour de la borne est dégagé</li>
+                <li>Le câble de recharge est correctement rangé</li>
+            </ul>
+
+            <h3>8.2. Mise sous tension progressive</h3>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Remise en route du disjoncteur général</strong>
+                <ul>
+                    <li>Remettez en position ON le disjoncteur de branchement (500 mA)</li>
+                    <li>Vérifiez qu'il ne déclenche pas immédiatement</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Activation de l'interrupteur différentiel 40A 30mA</strong>
+                <ul>
+                    <li>Basculez l'interrupteur différentiel de la ligne borne en position ON</li>
+                    <li>Vérifiez qu'il ne se déclenche pas (sinon, présence d'un défaut d'isolement)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Enclenchement du disjoncteur 40A de la borne</strong>
+                <ul>
+                    <li>Basculez le disjoncteur divisionnaire 40A en position ON</li>
+                    <li>La borne EVH2S7P04K doit s'initialiser (voyants/écran qui s'allument)</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Premier démarrage :</strong> Au premier démarrage, la borne effectue une phase d'auto-diagnostic qui peut durer 30 à 60 secondes. Un voyant clignotant est normal pendant cette phase.
+            </div>
+
+            <h3>8.3. Tests de fonctionnement</h3>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Test de l'interrupteur différentiel</strong>
+                <ul>
+                    <li>Appuyez sur le bouton TEST de l'interrupteur différentiel 30 mA</li>
+                    <li>L'interrupteur doit se déclencher immédiatement (coupure de l'alimentation)</li>
+                    <li>Réenclenchez l'interrupteur différentiel</li>
+                    <li>⚠️ Si le test échoue, l'ID est défectueux et doit être remplacé</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Vérification des voyants de la borne</strong>
+                <ul>
+                    <li>Voyant vert fixe = Borne alimentée et prête</li>
+                    <li>Voyant bleu clignotant = Mode appairage WiFi/Bluetooth</li>
+                    <li>Voyant rouge = Défaut (consultez le manuel d'utilisation)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Configuration de l'application mobile EVlink Home</strong>
+                <ul>
+                    <li>Téléchargez l'application "EVlink Home" sur votre smartphone (iOS ou Android)</li>
+                    <li>Créez un compte ou connectez-vous</li>
+                    <li>Activez le Bluetooth sur votre smartphone</li>
+                    <li>Lancez la procédure d'appairage dans l'application</li>
+                    <li>Suivez les instructions à l'écran pour connecter la borne à votre réseau WiFi</li>
+                    <li>Configurez les paramètres de charge (délestage, puissance max, programmation)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Test de charge d'un véhicule</strong>
+                <ul>
+                    <li>Branchez le câble de recharge Type 2 sur votre véhicule électrique</li>
+                    <li>Vérifiez que le vérrouillage s'active (clic)</li>
+                    <li>La charge doit démarrer automatiquement ou après validation dans l'application</li>
+                    <li>Vérifiez sur le tableau de bord du véhicule que la charge est en cours</li>
+                    <li>Surveillez la charge pendant 15-20 minutes pour détecter d'éventuelles anomalies</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Consuel :</strong> Pour toute nouvelle installation ou modification substantielle, une attestation de conformité (Consuel) peut être exigée avant la mise en service définitive. Renseignez-vous auprès de votre électricien ou sur www.consuel.com.
+            </div>
+        </div>
+
+        <div class="section" id="maintenance">
+            <h2>9. Maintenance et Entretien</h2>
+            
+            <h3>9.1. Maintenance préventive régulière</h3>
+
+            <h4>Mensuelle :</h4>
+            <ul>
+                <li>Inspection visuelle de la borne (pas de dégâts, fissures, signes de surchauffe)</li>
+                <li>Vérification du câble de recharge (pas de coupures, abrasions, déformations)</li>
+                <li>Nettoyage du connecteur Type 2 avec un chiffon sec et doux</li>
+                <li>Test de l'interrupteur différentiel via le bouton TEST</li>
+            </ul>
+
+            <h4>Trimestrielle :</h4>
+            <ul>
+                <li>Vérification du bon fonctionnement du système de verrouillage du câble</li>
+                <li>Contrôle de la température de la borne pendant une charge (doit rester tiède)</li>
+                <li>Nettoyage de la face avant de la borne avec un chiffon humide (borne hors tension)</li>
+                <li>Mise à jour du firmware via l'application EVlink Home (si disponible)</li>
+            </ul>
+
+            <h4>Annuelle :</h4>
+            <ul>
+                <li><strong>Intervention d'un électricien qualifié recommandée :</strong>
+                    <ul>
+                        <li>Contrôle du serrage de toutes les connexions électriques</li>
+                        <li>Mesure de l'isolement des circuits</li>
+                        <li>Vérification de la résistance de la prise de terre</li>
+                        <li>Test de déclenchement de l'interrupteur différentiel sous charge</li>
+                        <li>Contrôle thermographique des connexions (caméra infrarouge)</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section" id="troubleshooting">
+            <h2>10. Dépannage</h2>
+            
+            <h3>Problèmes courants et solutions</h3>
+
+            <h4>🔴 La borne ne s'allume pas</h4>
+            <ul>
+                <li>✓ Vérifiez que le disjoncteur 40A est bien enclenché</li>
+                <li>✓ Vérifiez que l'interrupteur différentiel est enclenché</li>
+                <li>✓ Contrôlez la tension d'alimentation au tableau (230V)</li>
+                <li>✓ Vérifiez les connexions dans la borne (serrage, continuité)</li>
+                <li>→ Si le problème persiste, contactez le SAV Schneider Electric</li>
+            </ul>
+
+            <h4>🔴 L'interrupteur différentiel se déclenche</h4>
+            <ul>
+                <li>✓ Défaut d'isolement possible : vérifiez l'état du câble d'alimentation</li>
+                <li>✓ Humidité dans la borne ou les connexions : laissez sécher 24h</li>
+                <li>✓ Testez sans la borne connectée (uniquement le câble) : si le défaut persiste, problème sur le câble</li>
+                <li>✓ Testez avec la borne connectée sans véhicule : si déclenchement, problème interne à la borne</li>
+                <li>→ Faites intervenir un électricien pour mesures d'isolement</li>
+            </ul>
+
+            <h4>🔴 La charge ne démarre pas</h4>
+            <ul>
+                <li>✓ Vérifiez que le véhicule est bien en mode "recharge" (contacteur ouvert)</li>
+                <li>✓ Vérifiez le verrouillage du connecteur sur le véhicule (clic audible)</li>
+                <li>✓ Contrôlez dans l'application EVlink Home que la borne est prête</li>
+                <li>✓ Vérifiez les programmations horaires (la charge peut être différée)</li>
+                <li>✓ Redémarrez la borne (coupure/remise sous tension au disjoncteur)</li>
+                <li>→ Consultez le manuel du véhicule pour compatibilité Type 2</li>
+            </ul>
+
+            <h3>Contacts utiles</h3>
+            <div class="info-box">
+                <strong>📞 Support Schneider Electric :</strong>
+                <ul>
+                    <li>Téléphone : 0 825 012 999 (service 0,18€/min + prix appel)</li>
+                    <li>Email : support.evlink@se.com</li>
+                    <li>Site web : <a href="https://www.se.com/fr" target="_blank">www.se.com/fr</a></li>
+                    <li>Horaires : Lundi-Vendredi 8h-18h</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Garantie :</strong> Toute intervention non autorisée sur la borne ou modification de l'installation peut annuler la garantie. En cas de doute, contactez toujours le fabricant ou un installateur agréé.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>✅ Conclusion</h2>
+            <p>L'installation d'une borne de recharge Schneider Electric EVH2S7P04K sur un tableau électrique Schneider dernière génération est une opération technique qui requiert des compétences en électricité et le respect strict des normes de sécurité.</p>
+            
+            <p><strong>Points clés à retenir :</strong></p>
+            <ul>
+                <li>✅ Faites toujours réaliser l'installation par un électricien qualifié et certifié IRVE</li>
+                <li>✅ Respectez scrupuleusement les normes NF C 15-100 et NF C 15-722</li>
+                <li>✅ Utilisez du matériel aux normes et de qualité (disjoncteur, câbles, protection différentielle)</li>
+                <li>✅ Ne négligez jamais les protections électriques (ID 30mA Type A minimum)</li>
+                <li>✅ Effectuez un entretien régulier pour garantir la sécurité et la longévité de votre installation</li>
+                <li>✅ Conservez tous les documents (factures, schémas, certificats de conformité) pour d'éventuels contrôles</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>💡 Aides financières :</strong> Renseignez-vous sur les aides disponibles pour l'installation d'une borne de recharge :
+                <ul>
+                    <li>Crédit d'impôt pour la transition énergétique</li>
+                    <li>Prime Advenir (pour certaines installations en copropriété)</li>
+                    <li>Aides locales (régions, départements, communes)</li>
+                    <li>TVA réduite à 5,5% sur le matériel et la pose (sous conditions)</li>
+                </ul>
+            </div>
+
+            <p style="margin-top: 30px; text-align: center; font-size: 1.1rem;">
+                <strong>Profitez de votre recharge électrique en toute sécurité ! 🔋⚡🚗</strong>
+            </p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 - Guide d'installation Schneider Electric EVH2S7P04K</p>
+        <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">
+            Ce guide est fourni à titre informatif uniquement. L'installation d'équipements électriques doit être réalisée par des professionnels qualifiés.<br>
+            Schneider Electric et EVlink sont des marques déposées de Schneider Electric SE.
+        </p>
+    </footer>
+</body>
+</html>
